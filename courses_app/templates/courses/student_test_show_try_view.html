@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load list_filter %}
+{% block content %}
+<div class="container pt-20">
+    <p>Попытка номер {{ try_no }}</p>
+    <p>Оцененные автоматически ответы:</p>
+    <div class="container">
+        {% for answer in automaticly_rated %}
+            <div class="border p-4 pl-5">
+                <p class="row">Вопрос: {{ answer.answer.question.question }}</p>
+                <p class="row">Максимально баллов: {{ answer.answer.question.rating }}</p>
+                {% if answer.question.hint and question.hint != '' %}
+                <p class="row">Подсказки проверяющему: {{ answer.answer.question.hint }}</p>
+                {% endif %}
+                Варианты ответов:
+                <div class="row">
+                    <div class="col-md-2">
+                        Правильный
+                    </div>
+                    <div class="col">
+                        Ответ
+                    </div>
+                </div>
+                {% for r_ans in answer.real_answers %}
+                    <div class="row">
+                        <div class="col-md-2">
+                            {% if r_ans.is_correct %}Верно
+                            {% else %}Неверно
+                            {% endif %}
+                        </div>
+                        <div class="col">
+                            {{ r_ans.text }}
+                        </div>
+                    </div>
+                {% endfor %}
+                Пользователь ввел:
+                {% if answer.answer.answer %}
+                    {% for ans in answer.answer.answer %}
+                        <div class="row">
+                            <div class="col-md-2">
+                            </div>
+                            <div class="col">
+                                {{ ans }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                <p class="pt-3">Баллы: {{ answer.answer.rate }}</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

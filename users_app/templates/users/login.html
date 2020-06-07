@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+    <div class="container m-auto">
+        <div class="">
+        <div class="col-md-5 offset-md-3">
+            <form method="POST" class="py-4 px-5 border border-secondary rounded-lg">
+                {% csrf_token %}
+                <div class="form-group">
+                    {{ form.username.errors }}
+                    <label for="{{ form.username.id_for_label }}">Имя пользователя</label> {{ form.username|add_class:'form-control' }}
+                    <small id="passwordHelpBlock" class="form-text text-muted">
+                        {{ form.username.help_text }}
+                    </small>
+                </div>
+                <div class="form-group">
+                    {{ form.password.errors }}
+                    <label for="{{ form.password.id_for_label }}">Пароль</label> {{ form.password|add_class:'form-control' }}
+                    <small id="passwordHelpBlock" class="form-text text-muted">
+                        {{ form.password.help_text }}
+                    </small>
+                </div>
+                <button type="submit" class="btn btn-dark">Войти</button>
+            </form>
+        </div>
+            </div>
+    </div>
+{% endblock %}

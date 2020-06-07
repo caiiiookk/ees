@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container pt-20">
+    <div class="card">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs">
+                <li class="nav-item">
+                    <a class="text-secondary nav-link active" href="{% url 'users_app:profile' id=opened_user.id %}">Информация</a>
+                </li>
+                {% if opened_user == user %}
+                <li class="nav-item">
+                    <a class="text-secondary nav-link" href="{% url 'users_app:edit' id=opened_user.id %}">Редактирование</a>
+                </li>
+                {% endif %}
+                {% if user.is_superuser or user_permissions.admin and opened_user == user or user_permissions.admin and not opened_user.eesuser.is_admin %}
+                <li class="nav-item">
+                    <a class="text-secondary nav-link" href="{% url 'users_app:admin-panel' id=opened_user.id %}">Управление</a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-2 d-flex align-middle flex-wrap text-center">
+                        <img class="img-thumbnail  my-auto" src="{{ opened_user.eesuser.avatar.url }}">
+                    </div>
+                    <div class="col-md-5">
+                        <p>Имя пользователя: {{ opened_user.username }}</p>
+                        <p>Email: {{ opened_user.email }}</p>
+                        <p>Присоединился: {{ opened_user.date_joined }}</p>
+                    </div>
+                    <div class="col-md-5">
+                        <p>Имя: {{ opened_user.first_name }} </p>
+                        <p>Фамилия: {{ opened_user.last_name }}</p>
+                        <p>Последний визит: {{ opened_user.last_login }}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">
+                        {% if opened_user != user %}
+                        <a class="text-secondary " href="{% url 'chat_app:chat_url' chat_type='u' chat_id=opened_user.id %}">Написать сообщение</a>
+                        {% endif %}
+                    </div>
+                    <div class="col">
+                        Roles:
+                        {% if opened_user.eesuser.is_admin %}
+                            Администратор&nbsp;
+                        {% endif %}
+                        {% if opened_user.is_superuser %}
+                            Superuser&nbsp;
+                        {% endif %}
+                        {% if opened_user.eesuser.is_teacher %}
+                            Преподаватель&nbsp;
+                        {% endif %}
+                        {% if opened_user.eesuser.is_employee %}
+                            Сотрудник&nbsp;
+                        {% endif %}
+                        {% if opened_user.eesuser.is_moderator %}
+                            Модератор&nbsp;
+                        {% endif %}
+                        {% if opened_user.eesuser.is_student %}
+                            Студент&nbsp;
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row border mt-3 p-2">
+                    <div class="col-md-2 border-right">
+                        Роли
+                    </div>
+                    <div class="col">
+                        Курсы
+                    </div>
+                </div>
+                {% if opened_user.eesuser.is_student %}
+                <div class="row border p-2">
+                    <div class="col-md-2 border-right">
+                        Ученик
+                    </div>
+                    <div class="col pl-5">
+                        {% for course in student_courses %}
+                        <div class="row">
+                            {{ course.name }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                {% if opened_user.eesuser.is_teacher %}
+                <div class="row border p-2">
+                    <div class="col-md-2 border-right">
+                        Преподаватель
+                    </div>
+                    <div class="col pl-5">
+                        {% for course in teacher_courses %}
+                        <div class="row">
+                            {{ course.name }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                {% if opened_user.eesuser.is_employee %}
+                <div class="row border p-2">
+                    <div class="col-md-2 border-right">
+                        Сотрудник
+                    </div>
+                    <div class="col pl-5">
+                        {% for course in employee_courses %}
+                        <div class="row">
+                            {{ course.name }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

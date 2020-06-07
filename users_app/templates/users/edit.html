@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container pt-20">
+    <div class="card">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs">
+                <li class="nav-item">
+                    <a class="text-secondary nav-link " href="{% url 'users_app:profile' id=opened_user.id %}">Информация</a>
+                </li>
+                {% if opened_user == user %}
+                <li class="nav-item">
+                    <a class="text-secondary nav-link active" href="{% url 'users_app:edit' id=opened_user.id %}">Редактирование</a>
+                </li>
+                {% endif %}
+                {% if user.is_superuser or user_permissions.admin and opened_user == user or user_permissions.admin and not opened_user.eesuser.is_admin %}
+                <li class="nav-item">
+                    <a class="text-secondary nav-link" href="{% url 'users_app:admin-panel' id=opened_user.id %}">Управление</a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="container">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="{{ eesuser_form.avatar.id_for_label }}">Аватар</label>
+                        {{ eesuser_form.avatar }}
+                    </div>
+                    <div class="form-group row">
+                        <label for="{{ user_form.username.id_for_label }}" class="col-sm-2 col-form-label">Имя пользователя</label>
+                        <div class="col-sm-10">
+                            {% render_field user_form.username value=user_form.username.value %}
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="{{ user_form.email.id_for_label }}" class="col-sm-2 col-form-label">Email</label>
+                        <div class="col-sm-10">
+                            {% render_field user_form.email class='form-control' placeholder='email@example.com' value=user_form.email.value %}
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="{{ user_form.first_name.id_for_label }}" class="col-sm-2 col-form-label">Имя</label>
+                        <div class="col-sm-10">
+                            {% render_field user_form.first_name class='form-control' placeholder='Иван' value=user_form.first_name.value %}
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="{{ user_form.email.id_for_label }}" class="col-sm-2 col-form-label">Фамилия</label>
+                        <div class="col-sm-10">
+                            {% render_field user_form.last_name class='form-control' placeholder='Иванов' value=user_form.last_name.value %}
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-dark" style="float: right;">Сохранить</button>
+                </form>
+                <a class="text-secondary" style="cursor: pointer;" href="{% url 'users_app:change_password' %}">Изменить пароль</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

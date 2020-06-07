@@ -1,6 +1,6 @@
 .idea/*
 123.png
-__pycache__/*
+*/__pycache__/*
 chat.png
 courses.png
 db.sqlite3

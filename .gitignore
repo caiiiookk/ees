@@ -1,6 +1,6 @@
-.idea/
+.idea/*
 123.png
-__pycache__/
+__pycache__/*
 chat.png
 courses.png
 db.sqlite3
@@ -10,9 +10,9 @@ my_project.dot
 my_project_subsystem.png
 my_project_visualized.png
 news.png
-psycopg2-2.8.5/
+psycopg2-2.8.5/*
 users.png
-venv/
+venv/*
 EES/settings.py
-static/admin/
-static/django-extensions/
+static/admin/*
+static/django-extensions/*

@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+<p>
+Элективный курс физики "Оптика для школьников".
+</p>
+<p>
+Преподаватели:
+</p>
+{% for teacher in teachers %}
+<p><a href="{% url 'users_app:profile' id=teacher.id %}">{{teacher.username}}, {{teacher.first_name}}, {{teacher.last_name}}</a></p>
+{% endfor %}
+</div>
+{% endblock %}

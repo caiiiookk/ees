@@ -17,7 +17,7 @@
                     <div>
                         <h6 class="card-title">
                         <a class="text-dark username_link" href="{% url 'users_app:profile' id=user.id %}">{{ user.username }}</a></h6>
-                        <p class="card-text"><small class="text-muted">Last online {{ user.last_login }}</small></p>
+                        <p class="card-text"><small class="text-muted">В сети {{ user.last_login }}</small></p>
                     </div>
                 </div>
             </div>

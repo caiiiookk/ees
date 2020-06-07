@@ -14,9 +14,9 @@
                     <a class="text-secondary nav-link active" href="{% url 'users_app:edit' id=opened_user.id %}">Редактирование</a>
                 </li>
                 {% endif %}
-                {% if user.is_superuser or user_permissions.admin and not opened_user == user %}
+                {% if user.is_superuser or user_permissions.admin and opened_user == user or user_permissions.admin and not opened_user.eesuser.is_admin %}
                 <li class="nav-item">
-                    <a class="text-secondary nav-link " href="{% url 'users_app:admin-panel' id=opened_user.id %}">Управление</a>
+                    <a class="text-secondary nav-link" href="{% url 'users_app:admin-panel' id=opened_user.id %}">Управление</a>
                 </li>
                 {% endif %}
             </ul>
@@ -26,7 +26,7 @@
                 <form method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="form-group">
-                        <label for="{{ eesuser_form.avatar.id_for_label }}">Avatar</label>
+                        <label for="{{ eesuser_form.avatar.id_for_label }}">Аватар</label>
                         {{ eesuser_form.avatar }}
                     </div>
                     <div class="form-group row">
@@ -55,7 +55,7 @@
                     </div>
                     <button type="submit" class="btn btn-dark" style="float: right;">Сохранить</button>
                 </form>
-                change password
+                <a class="text-secondary" style="cursor: pointer;" href="{% url 'users_app:change_password' %}">Изменить пароль</a>
             </div>
         </div>
     </div>

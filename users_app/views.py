@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, Http404
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordChangeForm
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User
 from .models import EESUser
@@ -7,7 +7,7 @@ from courses_app.models import CourseModel, Course2Teacher, Course2Employee, Cou
 from .forms import AdminPanelEESUserChangeForm
 from django import views
 from users_app import permissions
-from .forms import EESUserProfileEditForm, UserProfileEditForm, forms
+from .forms import EESUser_Form, UserProfileEditForm, forms
 # Create your views here.
 
 
@@ -45,7 +45,7 @@ class ProfileEditView(views.View):
         if opened_user != request.user:
             return redirect('users_app:profile', id=id)
 
-        eesuser_form = EESUserProfileEditForm(instance=opened_user.eesuser)
+        eesuser_form = EESUser_Form(instance=opened_user.eesuser)
         user_form = UserProfileEditForm(instance=opened_user)
         eesuser = opened_user.eesuser
         can_change_username = getattr(eesuser, 'can_change_username')
@@ -70,8 +70,8 @@ class ProfileEditView(views.View):
             raise Http404
         if opened_user != request.user:
             return redirect('users_app:profile', id=id)
-
-        eesuser_form = EESUserProfileEditForm(request.POST, request.FILES, instance=opened_user.eesuser)
+        print(request.POST)
+        eesuser_form = EESUser_Form(request.POST, request.FILES, instance=opened_user.eesuser)
         user_form = UserProfileEditForm(request.POST, instance=opened_user)
         eesuser = opened_user.eesuser
         can_change_username = getattr(eesuser, 'can_change_username')
@@ -105,7 +105,7 @@ class ProfileAdminPanelView(views.View):
             opened_user = User.objects.get(id=id)
         except:
             raise Http404
-        if not permissions.has_admin_permission(request.user):
+        if not(request.user.is_superuser or permissions.has_admin_permission(request.user) and (opened_user == request.user or not opened_user.eesuser.is_admin)):
             return redirect('users_app:profile', id=id)
         courses = CourseModel.objects.all()
         user_student_courses    = CourseModel.objects.filter(course2student__in=Course2Student.objects.filter(student=opened_user)).order_by('id')
@@ -143,7 +143,7 @@ class ProfileAdminPanelView(views.View):
             opened_user = User.objects.get(id=id)
         except:
             raise Http404
-        if not(request.user.is_superuser or permissions.has_admin_permission(request.user) and not opened_user == request.user):
+        if not(request.user.is_superuser or permissions.has_admin_permission(request.user) and (opened_user == request.user or not opened_user.eesuser.is_admin)):
             return redirect('users_app:profile', id=id)
         eesuser = opened_user.eesuser
         permissions_form = AdminPanelEESUserChangeForm(request.POST, instance=eesuser)
@@ -216,6 +216,20 @@ def sign_up_view(request):
     else:
         form = UserCreationForm()
     return render(request, 'users/sign_up.html', {'form': form})
+
+
+def change_password_view(request):
+    if not request.user.is_authenticated:
+        return redirect('main_app:main')
+    if request.method == 'POST':
+        form = PasswordChangeForm(data=request.POST, user=request.user)
+        if form.is_valid():
+            user = form.save()
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            return redirect('users_app:my_profile')
+    else:
+        form = PasswordChangeForm(user=request.user)
+    return render(request, 'users/change_pw.html', {'form': form})
 
 
 def my_profile_view(request):

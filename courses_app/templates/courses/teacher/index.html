@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                {{ path_widget|safe }}
+            </div>
+        </div>
+        <div class="row border">
+            <div class="col-md-2 offset-md-1">
+                Разделы:
+            </div>
+            <div class="col">
+                {% for section in sections %}
+                <div class="row py-2">
+                    <div class="col-md-7 text-break">
+                        <a href="section/{{ forloop.counter }}/">{{ section.name }}</a>
+                    </div>
+                    <div class="col">
+                        <a href="section/{{ forloop.counter }}/edit/">Редактировать</a>
+                        <form method="POST" action="section/{{ forloop.counter }}/delete/" class="d-inline m-0">
+                        {% csrf_token %}
+                            <a class="text-secondary" style="cursor:pointer;" onclick="if(confirm('Вы уверены, что хотите удалить этот раздел?')) this.closest('form').submit();">Удалить</a>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="row py-2">
+                    <a href="add_section/">Добавить</a>
+                </div>
+            </div>
+        </div>
+        <div class="row border">
+            <div class="col-md-2 offset-md-1">
+                Тесты:
+            </div>
+            <div class="col">
+                {% for test in tests %}
+                <div class="row py-2">
+                    <div class="col-md-7 text-break">
+                        <a href="test/{{ forloop.counter }}/">{{ test.name }}</a>
+                    </div>
+                    <div class="col">
+                        <a href="test/{{ forloop.counter }}/edit/">Редактировать</a>
+                        <form method="POST" action="test/{{ forloop.counter }}/delete/" class="d-inline m-0">
+                        {% csrf_token %}
+                            <a class="text-secondary" style="cursor:pointer;" onclick="if(confirm('Вы уверены, что хотите удалить этот тест?')) this.closest('form').submit();">Удалить</a>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="row py-2">
+                    <a href="add_test/">Добавить</a>
+                </div>
+            </div>
+        </div>
+        <div class="row border">
+            <div class="col-md-2 offset-md-1">
+                Страницы:
+            </div>
+            <div class="col">
+                {% for page in pages %}
+                <div class="row py-2">
+                    <div class="col-md-7 text-break">
+                        <a href="page/{{ forloop.counter }}/">{{ page.name }}</a>
+                    </div>
+                    <div class="col">
+                        <a href="page/{{ forloop.counter }}/edit/">Редактировать</a>
+                        <form method="POST" action="page/{{ forloop.counter }}/delete/" class="d-inline m-0">
+                        {% csrf_token %}
+                            <a class="text-secondary" style="cursor:pointer;" onclick="if(confirm('Вы уверены, что хотите удалить эту страницу?')) this.closest('form').submit();">Удалить</a>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="row py-2">
+                    <a href="add_page/">Добавить</a>
+                </div>
+            </div>
+        </div>
+        <div class="row border">
+            <div class="col-md-2 offset-md-1">
+                Документы:
+            </div>
+            <div class="col">
+                {% for document in documents %}
+                <div class="row py-2">
+                    <div class="col-md-7 text-break">
+                        <a href="document/{{ forloop.counter }}/">{{ document.name }}</a>
+                    </div>
+                    <div class="col">
+                        <a href="document/{{ forloop.counter }}/edit/">Редактировать</a>
+                        <form method="POST" action="document/{{ forloop.counter }}/delete/" class="d-inline m-0">
+                        {% csrf_token %}
+                            <a class="text-secondary" style="cursor:pointer;" onclick="if(confirm('Вы уверены, что хотите удалить этот документ?')) this.closest('form').submit();">Удалить</a>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="row py-2">
+                    <a href="add_document/">Добавить</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

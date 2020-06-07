@@ -1,0 +1,460 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="container">
+            <div class="row">
+                    {{ path_widget|safe }}
+            </div>
+        </div>
+    <div class="container pt-20">
+        <div class="row">
+            Изменение теста
+        </div>
+        <form method="POST" class="pt-20">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    {{ field.errors }}
+                    <label>{{ field.label }}</label>
+                    {{ field }}
+                    <small id="passwordHelpBlock" class="form-text text-muted">
+                        {{ field.help_text }}
+                    </small>
+                </div>
+            {% endfor %}
+
+                <div class="container questions mb-2">
+
+                </div>
+                <!-- Button trigger modal -->
+                <a href="#" class="btn btn-dark text-white" onclick="addQuestion()">
+                    Добавить вопрос
+                </a>
+                <!-- Modal -->
+                <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="exampleModalLongTitle">Добавление вопроса</h5>
+                          <a href="#" class="close close-modal" onclick="" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </a>
+                        </div>
+                        <div class="modal-body">
+
+                            <div class="container">
+                                <p id="question-label"></p>
+
+                                <div class="form-group" id="q-type">
+
+                                    <label>Тип</label>
+                                    <ul id="id_type" class="form-group" style="list-style-type: none;">
+                                        <li><label for="id_type_0"><input name="question-radio" onchange="showAnswers()" checked type="radio" value="r" class="form-group" required="" id="id_type_0">
+                                        Один вариант ответа</label>
+
+                                        </li>
+                                        <li><label for="id_type_1"><input name="question-radio" onchange="showAnswers()" type="radio" value="c" class="form-group" required="" id="id_type_1">
+                                        Несколько вариантов ответа</label>
+
+                                        </li>
+                                        <li><label for="id_type_2"><input name="question-radio" onchange="showAnswers()" type="radio" value="i" class="form-group" required="" id="id_type_2">
+                                        Свой ответ</label>
+
+                                        </li>
+                                        <li><label for="id_type_3"><input name="question-radio" onchange="showAnswers()" type="radio" value="f" class="form-group" required="" id="id_type_3">
+                                        Прикрепление файла</label>
+
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <div class="form-group" id="q-groups">
+
+                                    <label>Группы вопроса</label>
+                                    <input type="text" class="form-control">
+                                    <small class="form-text text-muted">
+                                        Введите через запятую, к каким группам относится вопрос.
+                                    </small>
+                                </div>
+
+                                <div class="form-group" id="q-question">
+
+                                    <label>Содержание вопроса</label>
+                                    <textarea cols="40" rows="10" class="form-control" id="id_question"></textarea>
+                                    <small id="passwordHelpBlock" class="form-text text-muted">
+
+                                    </small>
+                                </div>
+
+                                <div class="form-group" id="q-hint">
+
+                                    <label>Подсказки проверяющему</label>
+                                    <textarea cols="40" rows="10" class="form-control" id="id_hint"></textarea>
+
+                                </div>
+
+                                <div class="form-group" id="q-rating">
+
+                                    <label>Баллов за вопрос</label>
+                                    <input type="number" class="form-control" step="any"  id="id_rating">
+
+                                </div>
+
+                                <div class="container answers" id="q-answers">
+
+                                </div>
+                                <a href="#" id="add_answer_btn" class="btn btn-dark text-white" onclick="addAnswer()">Добавить ответ</a>
+
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                          <a href="#" class="btn btn-secondary close-modal text-white" onclick="">Закрыть</a>
+                          <button type="button" class="btn btn-dark submit-modal" onclick="">Добавить вопрос</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                <br>
+            <h5 class="mt-2">При изменении теста все ответы на него будут удалены</h5>
+            <input type="submit" class="btn btn-dark mt-2" onclick="return confirm('Вы уверены? При изменении теста все ответы учеников на него будут удалены.')" value="Изменить тест">
+        </form>
+    </div>
+    </div>
+
+    <script>
+        function addAnswer(){
+            answers = $(".answers");
+            count = answers.children().length;
+            html = $(
+                '<div class="container answer border p-4 my-2 " id="answer-' + count + '">\
+                    <p>Ответ ' + (count + 1) + '</p>\
+                    <div class="row">\
+                        <textarea cols="20" rows="5" class="form-control" id="id_question"></textarea>\
+                    </div>\
+                    <div class="row">\
+                        <label for="addanswer-cb' + count + '"><input id="addanswer-cb' + count + '" type="checkbox">Корректный</label>\
+                        <a href="#" class="btn btn-secondary ml-auto text-white" onclick="deleteAnswer(this)">Удалить</a>\
+                    </div>\
+                </div>'
+            );
+            answers.append(html);
+        }
+        function showAnswers(){
+            answers = $(".answers");
+            addAnswerBtn = $("#add_answer_btn");
+            if(!($('#id_type input')[0].checked || $('#id_type input')[1].checked)){
+                answers.hide();
+                addAnswerBtn.hide();
+                return;
+            }
+            answers.show();
+            addAnswerBtn.show();
+        }
+
+        function deleteAnswer(elem){
+            $(elem).parent().parent().remove();
+            answers = $(".answers");
+            for(var i = 0; i < answers.children().length; i++){
+                $(answers.children()[i]).find('p').html('Ответ ' + (i + 1));
+            }
+        }
+
+        if(questions === undefined)
+            questions = [];
+
+        editing_question = undefined;
+
+        cached_add_question = undefined;
+
+        function submitAddQuestion(){
+            modal = $('#exampleModalLong');
+
+            question = formJSONfromModel();
+            type = question['type'];
+            groups = question['groups'];
+            q_question = question['question'];
+            hint = question['hint'];
+            rating = question['rating'];
+            answers = question['answers'];
+            if(Number(rating) === rating){
+                alert('Неверное значение баллов за вопрос');
+                return;
+            }
+            if(q_question == '' || q_question == undefined){
+                alert('Введите содержание вопроса');
+                return;
+            }
+            if((type == 'r' || type == 'c') && answers.length <= 1){
+                alert('Добавьте ответы на вопрос, либо выберете другой тип вопроса');
+                return;
+            }
+            for(var i = 0; i < answers.length; i++){
+                if(answers[i]['text'] == '' || answers[i]['text'] == undefined){
+                    alert('Введите содержание ответа');
+                    return;
+                }
+            }
+
+            questions.push(question);
+            cached_add_question = undefined;
+            modal.modal('hide');
+            updateQuestions();
+        }
+
+        function updateQuestions(){
+            questions_field = $('.questions');
+            questions_field.empty();
+            typeFromVal = {
+                'r': 'Один вариант ответа',
+                'c': 'Несколько вариантов ответа',
+                'i': 'Свой ответ',
+                'f': 'Прикрепление файла',
+            };
+            for(var i = 0; i < questions.length; i++){
+                answers = '';
+                for(var j = 0; j < questions[i]['answers'].length; j++){
+                    answers += '<div class="row py-2">\
+                        ' + questions[i]['answers'][j]['text'] + (questions[i]['answers'][j]['is_correct'] ? ' (корректный)' : '') + '\
+                    </div>'
+                }
+                html =
+                    '<div class="container question border px-5 py-2">\
+                        <div class="row" style="float: right;">\
+                            <a href="#" class="pr-3" onclick="editQuestion(' + (i + 1) + ')">Редактировать</a>\
+                            <a href="#" class="" onclick="deleteQuestion(' + (i + 1) + ')">Удалить</a>\
+                        </div>\
+                        <p>Вопрос ' + (i + 1) + '</p>\
+                        <div class="row">\
+                            <div class="col-md-3">\
+                                Вопрос:\
+                            </div>\
+                            <div class="col text-break">\
+                                ' + questions[i]['question'] + '\
+                            </div>\
+                        </div>\
+                        <div class="row">\
+                            <div class="col-md-3">\
+                                Тип:\
+                            </div>\
+                            <div class="col text-break">\
+                                ' + typeFromVal[questions[i]['type']] + '\
+                            </div>\
+                        </div>\
+                        <div class="row">\
+                            <div class="col-md-3">\
+                                Группы:\
+                            </div>\
+                            <div class="col text-break">\
+                                ' + questions[i]['groups'].join(', ') + '\
+                            </div>\
+                        </div>\
+                        <div class="row">\
+                            <div class="col-md-3">\
+                                Баллы:\
+                            </div>\
+                            <div class="col text-break">\
+                                ' + questions[i]['rating'] + '\
+                            </div>\
+                        </div>\
+                        ' + (answers == '' ? '' : (
+                        '<div class="container pt-2">\
+                            Ответы:\
+                            ' + answers + '\
+                        </div>')) + '\
+                    </div>'
+                ;
+                questions_field.append(html);
+            }
+        }
+
+        function submitEditQuestion(){
+            modal = $('#exampleModalLong');
+
+            question = formJSONfromModel();
+            type = question['type'];
+            groups = question['groups'];
+            q_question = question['question'];
+            hint = question['hint'];
+            rating = question['rating'];
+            answers = question['answers'];
+            if(Number(rating) === rating){
+                alert('Неверное значение баллов за вопрос');
+                return;
+            }
+            if(q_question == '' || q_question == undefined){
+                alert('Введите содержание вопроса');
+                return;
+            }
+            if((type == 'r' || type == 'c') && answers.length <= 1){
+                alert('Добавьте ответы на вопрос, либо выберете другой тип вопроса');
+                return;
+            }
+            correct_answers = 0
+            for(var i = 0; i < answers.length; i++){
+                if(answers[i]['text'] == '' || answers[i]['text'] == undefined){
+                    alert('Введите содержание ответа');
+                    return;
+                }
+                if(answers[i]['is_correct'])
+                    correct_answers++;
+            }
+            if(correct_answers < 1 && (type == 'r' || type == 'c')){
+                alert('Хотя бы один ответ должен быть корректным');
+                return;
+            }
+
+            questions[editing_question] = question;
+            modal.modal('hide');
+            updateQuestions();
+        }
+
+        function addQuestion(){
+            modal = $('#exampleModalLong');
+            modal.find('#question-label').html('Вопрос ' + (questions.length + 1) + ' (добавление)')
+            $('.close-modal').each(
+                (index, el) => {
+                    $(el).unbind();
+                    $(el).on('click', closeAddQuestion);
+                }
+            )
+            submit_modal = $('.submit-modal').first();
+            submit_modal.unbind();
+            submit_modal.first().on('click', submitAddQuestion);
+            submit_modal.first().html('Добавить вопрос');
+            loadModelFromJSON(cached_add_question)
+            modal.modal('show')
+        }
+
+        function editQuestion(num){
+            modal = $('#exampleModalLong');
+            modal.find('#question-label').html('Вопрос ' + (num) + ' (редактирование)')
+            $('.close-modal').each(
+                (index, el) => {
+                    $(el).unbind();
+                    $(el).on('click', closeEditQuestion);
+                }
+            )
+            submit_modal = $('.submit-modal').first();
+            submit_modal.unbind();
+            submit_modal.first().on('click', submitEditQuestion);
+            submit_modal.first().html('Редактировать вопрос');
+            loadModelFromJSON(questions[num - 1]);
+            editing_question = num - 1;
+            modal.modal('show')
+        }
+
+        function deleteQuestion(num){
+            questions.splice(num - 1, 1);
+            updateQuestions();
+        }
+
+        function closeAddQuestion(){
+            modal = $('#exampleModalLong');
+            cached_add_question = formJSONfromModel()
+            modal.modal('hide');
+        }
+
+        function closeEditQuestion(){
+            modal = $('#exampleModalLong');
+            modal.modal('hide');
+        }
+
+        function formJSONfromModel(){
+            question = {}
+            modalContainer = $('.modal-body > .container');
+            q_type = modalContainer.find('#q-type');
+            q_groups = modalContainer.find('#q-groups');
+            q_question = modalContainer.find('#q-question');
+            q_hint = modalContainer.find('#q-hint');
+            q_rating = modalContainer.find('#q-rating');
+            q_answers = modalContainer.find('#q-answers');
+            question['type'] = $(q_type).find('input:checked')[0].value;
+            q_groups_value = $(q_groups).find('input').val();
+            question['groups'] = q_groups_value.split(',');
+            question['question'] = $(q_question).find('textarea').val();
+            question['hint'] = $(q_hint).find('textarea').val();
+            question['rating'] = $(q_rating).find('input').val();
+            question['answers'] = [];
+            for(var i = 0; i < $(q_answers).find('.answer').length; i++){
+                answer = $(q_answers).find('.answer')[i];
+                answer_text = $(answer).find('textarea').val();
+                answer_is_correct = $(answer).find('input').is(':checked');
+                question['answers'].push({
+                    'text': answer_text,
+                    'is_correct': answer_is_correct,
+                });
+            }
+            if (question['rating'] == '')
+                question['rating'] = 1;
+            return(question);
+        }
+
+        function loadModelFromJSON(json){
+            if(json === undefined)
+                json = {};
+            if(json['groups'] === undefined)
+                json['groups'] = [];
+            if(json['answers'] === undefined)
+                json['answers'] = [];
+            if(json['rating'] === undefined)
+                json['rating'] = 1;
+            if(json['type'] === undefined)
+                json['type'] = 'r';
+            modalContainer = $('.modal-body > .container');
+            q_type = modalContainer.find('#q-type');
+            q_groups = modalContainer.find('#q-groups');
+            q_question = modalContainer.find('#q-question');
+            q_hint = modalContainer.find('#q-hint');
+            q_rating = modalContainer.find('#q-rating');
+            q_answers = modalContainer.find('#q-answers');
+            $(q_groups).find('input').val(json['groups'].join(', '));
+            $($(q_type).find('input[value="' + json['type'] + '"]')).prop('checked', true);;
+            $(q_question).find('textarea').val(json['question']);
+            $(q_hint).find('textarea').val(json['hint']);
+            $(q_rating).find('input').val(json['rating']);
+            q_answers.empty();
+            for(var i = 0; i < json['answers'].length; i++){
+                answer = json['answers'][i];
+                answer_text = answer['text'];
+                answer_is_correct = answer['is_correct'];
+                count = q_answers.children().length;
+                html = $(
+                    '<div class="container answer border p-4 my-2 " id="answer-' + count + '">\
+                        <p>Ответ ' + (count + 1) + '</p>\
+                        <div class="row">\
+                            <textarea cols="20" rows="5" class="form-control" id="id_question">' + answer_text + '</textarea>\
+                        </div>\
+                        <div class="row">\
+                            <label for="addanswer-cb' + count + '"><input checked="' + answer_is_correct + '" id="addanswer-cb' + count + '" type="checkbox">Корректный</label>\
+                            <a class="btn btn-secondary ml-auto text-white" onclick="deleteAnswer(this)" href="#">Удалить</a>\
+                        </div>\
+                    </div>'
+                );
+                q_answers.append(html);
+            }
+        }
+    </script>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        $(document).ready(() => {
+            showAnswers();
+            cached_add_question = undefined;
+            questions = {{ my_questions|safe }};
+            updateQuestions();
+            $('form').submit((eventObj) => {
+                if(questions == undefined || questions.length == 0){
+                    alert('Добавьте хотя бы один вопрос');
+                    return false;
+                }
+              $("<input />").attr("type", "hidden")
+                  .attr("name", "my_json")
+                  .attr("value", JSON.stringify({'questions': questions}))
+                  .appendTo("form");
+              return true;
+            });
+        });
+    </script>
+{% endblock %}

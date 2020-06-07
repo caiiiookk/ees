@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container d-flex pt-20 flex-column text-break">
+        <div class="container">
+            {% if student_courses %}
+            <div class="row p-3 border">
+                <div class="col-md-4">
+                    Ученические курсы:
+                </div>
+                <div class="col-md-8">
+                    <ul class="list-group list-group-flush">
+                        {% for course in student_courses %}
+                        <li class="list-group-item">
+                            <a class="text-secondary" href="{% url 'courses_app:s-section' course_id=course.id %}">{{ course.name }}</a>
+                            <div style="float: right;">
+                                <a class="text-secondary" href="{% url 'courses_app:course_info' id=course.id %}">Информация</a>
+                                {% if user.is_superuser %}
+                                        <a class="text-secondary" href="{% url 'courses_app:edit_course' id=course.id %}">Изменить</a>
+                                        <form method="POST" action="{% url 'courses_app:delete_course' id=course.id %}" class="d-inline m-0">
+                                        {% csrf_token %}
+                                            <a class="text-secondary" style="cursor:pointer;" onclick="if(confirm('Вы уверены, что хотите удалить этот курс?')) this.closest('form').submit();">Удалить</a>
+                                        </form>
+                                {% endif %}
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+            {% if teacher_courses %}
+            <div class="row p-3 border">
+                <div class="col-md-4">
+                    Преподавательские курсы:
+                </div>
+                <div class="col-md-8">
+                    <ul class="list-group list-group-flush">
+                        {% for course in teacher_courses %}
+                        <li class="list-group-item">
+                            <a class="text-secondary" href="{% url 'courses_app:t-section' course_id=course.id %}">{{ course.name }}</a>
+                            <div style="float: right;">
+                                <a class="text-secondary" href="{% url 'courses_app:course_info' id=course.id %}">Информация</a>
+                                {% if user.is_superuser %}
+                                        <a class="text-secondary" href="{% url 'courses_app:edit_course' id=course.id %}">Изменить</a>
+                                        <form method="POST" action="{% url 'courses_app:delete_course' id=course.id %}" class="d-inline m-0">
+                                        {% csrf_token %}
+                                            <a class="text-secondary" style="cursor:pointer;" onclick="if(confirm('Вы уверены, что хотите удалить этот курс?')) this.closest('form').submit();">Удалить</a>
+                                        </form>
+                                {% endif %}
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+            {% if employee_courses %}
+            <div class="row p-3 border">
+                <div class="col-md-4">
+                    Курсы сотрудника (оценивания):
+                </div>
+                <div class="col-md-8">
+                    <ul class="list-group list-group-flush">
+                        {% for course in employee_courses %}
+                        <li class="list-group-item">
+                            <a class="text-secondary" href="{% url 'courses_app:e-section' course_id=course.id %}">{{ course.name }}</a>
+                            <div style="float: right;">
+                                <a class="text-secondary" href="{% url 'courses_app:course_info' id=course.id %}">Информация</a>
+                                {% if user.is_superuser %}
+                                        <a class="text-secondary" href="{% url 'courses_app:edit_course' id=course.id %}">Изменить</a>
+                                        <form method="POST" action="{% url 'courses_app:delete_course' id=course.id %}" class="d-inline m-0">
+                                        {% csrf_token %}
+                                            <a class="text-secondary" style="cursor:pointer;" onclick="if(confirm('Вы уверены, что хотите удалить этот курс?')) this.closest('form').submit();">Удалить</a>
+                                        </form>
+                                {% endif %}
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+            {% if user_permissions.admin %}
+                <div class="container mt-auto">
+                    <a class="text-secondary" href="{% url 'courses_app:add_course' %}" style="float: right;">Добавить курс</a>
+                </div>
+            {% endif %}
+    </div>
+{% endblock %}

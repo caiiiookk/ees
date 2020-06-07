@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                {{ path_widget|safe }}
+            </div>
+        </div>
+        <div class="row border">
+            <div class="col-md-3 offset-md-1">
+                Разделы:
+            </div>
+            <div class="col">
+                {% for section in sections %}
+                <div class="row py-2">
+                    <div class="col-md-7 text-break">
+                        <a href="section/{{ forloop.counter }}">{{ section.name }}</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="row border">
+            <div class="col-md-3 offset-md-1">
+                Тесты:
+            </div>
+            <div class="col">
+                {% for test in tests %}
+                <div class="row py-2">
+                    <div class="col-md-7 text-break">
+                        <a href="test/{{ forloop.counter }}/">{{ test.name }}</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

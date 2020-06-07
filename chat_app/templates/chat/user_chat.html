@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block style %}
+
+            .overflow::-webkit-scrollbar {
+              width: 4px;
+            }
+
+            .overflow::-webkit-scrollbar-track {
+              box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+            }
+
+            .overflow::-webkit-scrollbar-thumb {
+              background-color: darkgrey;
+              outline: 1px solid slategrey;
+            }
+    .msgs-msgs:hover{
+        background-color:#6c757d;
+    }
+    .msgs-container:hover{
+        background-color: lightgrey;
+    }
+{% endblock %}
+
+{% block content %}
+    <div class="container w-75 mt-3">
+        <div class="row" style="height: 75vh;">
+            {% include 'chat/chats_list.html' %}
+            <div class="col d-flex flex-column h-100" style="background-color: slategrey">
+                <div class="row bg-light">
+                    <a href="{% url 'users_app:profile' id=other_user.id %}"> <img src="{{ other_user.eesuser.avatar.url }}" style="height: 20px">{{ other_user.username}}</a>
+                </div>
+                <div class="flex-column overflow flex-nowrap h-100 text-break d-flex" id="scrolling-div" style="overflow-x: hidden;overflow-y: auto; flex: 1 1 auto;">
+                    {% for chat_message in chat_messages %}
+                        <div class="row msgs-container p-2">
+                            <div class="col-md-1 msgs-photo">
+                                <img class="w-100" src="{{ chat_message.sender.eesuser.avatar.url }}">
+                            </div>
+                            <div class="col-md">
+                                <div class="row msgs-sender">
+                                    <div class="col-md-11">
+                                        <a href="{% url 'users_app:profile' id=chat_message.sender.id %}">{{ chat_message.sender.username }}</a>
+                                        <span style="float: right;"> {{ chat_message.datetime }}</span>
+                                    </div>
+                                </div>
+                                <div class="msgs-msgs">
+                                    <div class="row msgs-msg p-2">
+                                        <div class="col-md msg-text">
+                                            {{ chat_message.content }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="row mt-auto">
+                    <form method="POST" id="send_msg_form">
+                        {% csrf_token %}
+                        <input name="message" id="message" type="text" placeholder="Введите сообщение">
+                        <input type="submit" value="Отправить">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'chat.js' %}"></script>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    var objDiv = document.getElementById("scrolling-div");
+    objDiv.scrollTop = objDiv.scrollHeight;
+
+
+    var loc = window.location;
+
+    var wsStart = 'ws://';
+    if(loc.protocol == 'HTTPS'){
+        wsStart = 'wss://';
+    }
+
+    var endpoint = wsStart + loc.host + '/ws' + loc.pathname;
+
+    var formData = $('#send_msg_form')
+    var msgInput = $(formData).find('#message')
+    var chatHolder = $('#scrolling-div')
+
+    function start_websocket(endpoint){  
+        var socket = new WebSocket(endpoint)
+
+        socket.onmessage = (e) => {
+            json_response_data = JSON.parse(e.data)
+            console.log('message', json_response_data)
+            chatHolder.append('<div class="row msgs-container p-2">\
+                            <div class="col-md-1 msgs-photo">\
+                                <img class="w-100" src="' + json_response_data.avatar_url + '">\
+                            </div>\
+                            <div class="col-md">\
+                                <div class="row msgs-sender">\
+                                    <div class="col-md-11">\
+                                        <a href="' + json_response_data.user_profile_url + '">' + json_response_data.sender_username + '</a>\
+                                        <span style="float: right;">' + json_response_data.send_time + '</span>\
+                                    </div>\
+                                </div>\
+                                <div class="msgs-msgs">\
+                                    <div class="row msgs-msg p-2">\
+                                        <div class="col-md msg-text">\
+                                            ' + json_response_data.message + '\
+                                        </div>\
+                                    </div>\
+                                </div>\
+                            </div>\
+                        </div>')
+            objDiv.scrollTop = objDiv.scrollHeight;
+        }
+
+        var preventSubmit = (event) => {
+                        event.preventDefault();
+                        
+                        var msgText = msgInput.val()
+                        var finalData = {
+                            'message': msgText,
+                        };
+
+                        socket.send(JSON.stringify(finalData))
+                        msgInput.val('')
+                    }
+        socket.onopen = (e) => {
+            console.log('open', e)
+            formData.submit(preventSubmit);
+        }
+        socket.onerror = (e) => {
+            console.log('error', e)
+        }
+        socket.onclose = (e) => {
+            console.log('close', e)
+            formData.off('submit')
+            setTimeout(
+                () => {
+                    console.log('trying to reconnect...');
+                    start_websocket(endpoint);
+                }, 
+                5000
+            );
+        }
+    }
+    start_websocket(endpoint)
+</script>
+{% endblock %}

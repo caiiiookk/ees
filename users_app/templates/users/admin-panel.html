@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container pt-20">
+    <form method="POST" class="card">
+        {% csrf_token %}
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs">
+                <li class="nav-item">
+                    <a class="text-secondary nav-link " href="{% url 'users_app:profile' id=opened_user.id %}">Информация</a>
+                </li>
+                {% if opened_user == user %}
+                <li class="nav-item">
+                    <a class="text-secondary nav-link" href="{% url 'users_app:edit' id=opened_user.id %}">Редактирование</a>
+                </li>
+                {% endif %}
+                {% if user.is_superuser or user_permissions.admin and not opened_user == user %}
+                <li class="nav-item">
+                    <a class="text-secondary nav-link active" href="{% url 'users_app:admin-panel' id=opened_user.id %}">Управление</a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-9">
+                        <div class="container pt-3">
+                            <div class="row border py-2">
+                                <div class="col-md">
+                                    <div class="container">
+                                        Доступные преподавательские курсы:
+                                        <div class="pt-2">
+                                            <select id="select1" class="custom-select" multiple>
+                                                {% for course in courses %}
+                                                    {% if course not in user_teacher_courses %}
+                                                        <option value="{{ course.id }}">{{ course.name }}</option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="align-self-center col-md-1 pt-4">
+                                    <input type="button" onclick="addOptions('select1', 'select2')" value=">">
+                                    <input type="button" onclick="addOptions('select2', 'select1')" value="<">
+                                </div>
+                                <div class="col-md">
+                                    <div class="container">
+                                        Выбранные преподавательские курсы:
+                                        <div class="pt-2">
+                                            <select id="select2" name="select2" class="custom-select" multiple>
+                                                {% for course in user_teacher_courses %}
+                                                <option value="{{ course.id }}">{{ course.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="container pt-3">
+                            <div class="row border py-2">
+                                <div class="col-md">
+                                    <div class="container">
+                                        Доступные курсы сотрудника:
+                                        <div class="pt-2">
+                                            <select id="select3" class="custom-select" multiple>
+                                                {% for course in courses %}
+                                                    {% if course not in user_employee_courses %}
+                                                        <option value="{{ course.id }}">{{ course.name }}</option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="align-self-center col-md-1 pt-4">
+                                    <input type="button" onclick="addOptions('select3', 'select4')" value=">">
+                                    <input type="button" onclick="addOptions('select4', 'select3')" value="<">
+                                </div>
+                                <div class="col-md">
+                                    <div class="container">
+                                        Выбранные курсы сотрудника:
+                                        <div class="pt-2">
+                                            <select id="select4" name="select4" class="custom-select" multiple>
+                                                {% for course in user_employee_courses %}
+                                                <option value="{{ course.id }}">{{ course.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="container pt-3">
+                            <div class="row border py-2">
+                                <div class="col-md">
+                                    <div class="container">
+                                        Доступные ученические курсы:
+                                        <div class="pt-2">
+                                            <select id="select5" class="custom-select" multiple>
+                                                {% for course in courses %}
+                                                    {% if course not in user_student_courses %}
+                                                        <option value="{{ course.id }}">{{ course.name }}</option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="align-self-center col-md-1 pt-4">
+                                    <input type="button" onclick="addOptions('select5', 'select6')" value=">">
+                                    <input type="button" onclick="addOptions('select6', 'select5')" value="<">
+                                </div>
+                                <div class="col-md">
+                                    <div class="container">
+                                        Выбранные ученические курсы:
+                                        <div class="pt-2">
+                                            <select id="select6" name="select6" class="custom-select" multiple>
+                                                {% for course in user_student_courses %}
+                                                <option value="{{ course.id }}">{{ course.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <p>Пользователь: {{ opened_user.username }}</p>
+                        <p class="pt-1">Включить изменение пользователем:</p>
+                        <div class="container">
+                            <div class="form-check">
+                                {{ permissions_form.can_change_username }}
+                                <label class="form-check-label" for="{{ permissions_form.can_change_username.id_for_label }}">
+                                    Имя пользователя
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                {{ permissions_form.can_change_email }}
+                                <label class="form-check-label" for="{{ permissions_form.can_change_email.id_for_label }}">
+                                    Email
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                {{ permissions_form.can_change_first_name }}
+                                <label class="form-check-label" for="{{ permissions_form.can_change_first_name.id_for_label }}">
+                                    Имя
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                {{ permissions_form.can_change_last_name }}
+                                <label class="form-check-label" for="{{ permissions_form.can_change_last_name.id_for_label }}">
+                                    Фамилия
+                                </label>
+                            </div>
+                        </div>
+                        <p class="pt-3">Роли:</p>
+                        <div class="container">
+                            <div class="form-check">
+                                {{ permissions_form.is_admin }}
+                                <label class="form-check-label" for="{{ permissions_form.is_admin.id_for_label }}">
+                                    Администратор
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                {{ permissions_form.is_moderator }}
+                                <label class="form-check-label" for="{{ permissions_form.is_moderator.id_for_label }}">
+                                    Модератор
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                {{ permissions_form.is_teacher }}
+                                <label class="form-check-label" for="{{ permissions_form.is_teacher.id_for_label }}">
+                                    Преподаватель
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                {{ permissions_form.is_employee }}
+                                <label class="form-check-label" for="{{ permissions_form.is_employee.id_for_label }}">
+                                    Сотрудник
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                {{ permissions_form.is_student }}
+                                <label class="form-check-label" for="{{ permissions_form.is_student.id_for_label }}">
+                                    Ученик
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                {{ is_active.is_active }}
+                                <label class="form-check-label" for="{{ is_active.is_active.id_for_label }}">
+                                    Активен
+                                </label>
+                            </div>
+                        </div>
+                        <p class="text-muted pt-4">Обратите внимание, что если преподаватель прикреплен к преподавательскому курсу, он так же прикрепляется и к курсу работника и студента, хоть здесь это и не отображается.</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <input type="submit" value="Сохранить" onclick="selectAll()" class="ml-auto">
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+    <script>
+    function addOptions( fromId, toId ) {
+    var fromEl = document.getElementById( fromId ),
+        toEl = document.getElementById( toId );
+
+    if ( fromEl.selectedIndex >= 0 ) {
+        var index = toEl.options.length;
+
+        for ( var i = 0; i < fromEl.options.length; i++ ) {
+            if ( fromEl.options[ i ].selected ) {
+                toEl.options[ index ] = fromEl.options[ i ];
+                i--;
+                index++
+            }
+        }
+    }
+}
+function selectAll(){
+        selectBoxes = [document.getElementById("select2"), document.getElementById("select4"), document.getElementById("select6")];
+        for(var j = 0; j < selectBoxes.length; j++)
+        for (var i = 0; i < selectBoxes[j].options.length; i++)
+        {
+             selectBoxes[j].options[i].selected = true;
+        }
+    }
+    </script>
+{% endblock %}

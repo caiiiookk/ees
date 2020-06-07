@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container pt-20">
+        <div class="row">
+            Изменение новости {{ name }}
+        </div>
+        <form method="POST" class="pt-20">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    {{ field.errors }}
+                    {{ field.label_tag }} {{ field }}
+                    {% if field.help_text %}
+                    <p class="help">{{ field.help_text|safe }}</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <input type="submit" value="Сохранить">
+            <a class="text-secondary" onclick="return confirm('Вы уверены, что хотите удалить эту новость?')" href="{% url 'news_app:delete' id=id %}">Удалить</a>
+        </form>
+    </div>
+{% endblock %}

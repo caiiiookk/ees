@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container d-flex flex-column pt-20">
+    {% for new in news %}
+        <div class="card mb-1">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col">
+                        <h5>
+                        <a class="text-dark" href="{% url 'news_app:show' id=new.id %}">{{ new.name }}</a></h5>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>{{ new.content }}</p>
+                <footer class="text-muted" style="float: left">
+                        <a class="text-secondary" href="{% url 'users_app:profile' id=new.publisher.id %}">{{ new.publisher.username }}</a>, {{ new.publish_date }}</footer>
+                {% if new.publisher == user %}
+                    {% if user_permissions.moderator %}
+                        <footer style="float: right"><a class="text-secondary" href="{% url 'news_app:edit' id=new.id %}">Редактировать</a></footer>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+    {% if user_permissions.moderator %}
+        <div class="container mt-auto">
+            <a class="text-secondary" href="{% url 'news_app:add' %}" style="float: right; width: 150px">Добавить новость</a>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

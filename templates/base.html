@@ -1,0 +1,156 @@
+{% load static %}
+<!DOCTYPE html>
+
+<html lang="en" class="h-100">
+    <head>
+        <meta charset="utf-8">
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <title>{% block title %}{{ appname }}{% endblock %}</title>
+        <link
+            href="https://getbootstrap.com//docs/4.4/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+            crossorigin="anonymous">
+
+        <link rel="stylesheet" href="{% static 'styles.css' %}">
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.11/vue.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.min.js"></script><head>
+
+        <style>
+            a{
+                    color: #343a40;
+            }
+            a:hover{
+                color: black;
+            }
+            body{
+                min-height: 100%;
+            }
+            body::-webkit-scrollbar {
+              width: 4px;
+            }
+
+            body::-webkit-scrollbar-track {
+              box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+            }
+
+            body::-webkit-scrollbar-thumb {
+              background-color: darkgrey;
+              outline: 1px solid slategrey;
+            }
+            .page-content{
+                height: 100%;
+                  display: flex;
+                  flex: 1 1 auto;
+                width: 100%;
+            }
+
+            .nav-item .active{
+                color: black !important;
+            }
+
+            a:hover{
+                text-decoration: none;
+            }
+
+            .pt-20{
+                padding-top: 20px;
+            }
+            {% block style %}{% endblock %}
+        </style>
+
+    </head>
+    <body class="d-flex flex-column ">
+        <header class="sticky-top">
+            <!-- Fixed navbar -->
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <div class="container-fluid">
+                    <a class="navbar-brand offset-md-1" href="{% url 'main_app:main' %}">Школа юных</a>
+                    <button
+                        class="navbar-toggler"
+                        type="button"
+                        data-toggle="collapse"
+                        data-target="#navbarsExample07"
+                        aria-controls="navbarsExample07"
+                        aria-expanded="false"
+                        aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <div class="collapse navbar-collapse offset-md-1" id="navbarsExample07">
+                        <ul class="navbar-nav mr-auto">
+                            <li class="nav-item">
+                                <a class="nav-link{% if appname == 'main_app' %} active{% endif %}" href="{% url 'main_app:main' %}">Главная</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link{% if appname == 'news_app' %} active{% endif %}" href="{% url 'news_app:news' %}">Новости</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link{% if appname == 'courses_app' %} active{% endif %}" href="{% url 'courses_app:courses' %}">Мои курсы</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link{% if appname == 'users_app' %} active{% endif %}" href="{% url 'users_app:users' %}">Пользователи</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link{% if appname == 'chat_app' %} active{% endif %}" href="{% url 'chat_app:main_chat_url' %}">Сообщения</a>
+                            </li>
+                        </ul>
+
+                        {% if request.user.is_authenticated %}
+                            <div id="user">
+                                {% if request.user.username %}
+                                    <a href="{% url 'users_app:my_profile' %}" class="text-dark">{{ request.user.username }}</a>
+                                {% elif request.user.email  %}
+                                    {{ request.user.email }}
+                                {% else %}
+                                    Anonymous
+                                {% endif %}
+                                <a href="{% url 'users_app:logout' %}" class="text-secondary">Выход</a>
+                            </div>
+                        {% else %}
+                            <div id="auth">
+                                <a class="btn btn-light" href="{% url 'users_app:login' %}">Вход</a>
+                                <a class="btn btn-light" href="{% url 'users_app:sign_up' %}">Регистрация</a>
+                            </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+        <main class="page-content">
+            {% block content %}
+                Empty content block.
+            {% endblock %}
+        </main>
+
+        <footer class="footer mt-auto py-3">
+            <div class="container">
+                <div class="row">
+                    <a class="nav-link text-secondary small" href="{% url 'main_app:about' %}">О нас</a>
+                    <a class="nav-link text-secondary small" href="{% url 'main_app:contacts' %}">Контакты</a></div>
+            </div>
+        </footer>
+
+        <script
+            src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+            integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+            crossorigin="anonymous"></script>
+        <script>
+            window.jQuery || document.write('<script src="/docs/4.4/assets/js/vendor/jquery.slim.min.js"><\/script>')
+        </script>
+        <script
+            src="https://getbootstrap.com/docs/4.4/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-6khuMg9gaYr5AxOqhkVIODVIvm9ynTT5J4V1cfthmT+emCG6yVmEZsRHdxlotUnm"
+            crossorigin="anonymous"></script>
+
+    {% block scripts %}
+
+    {% endblock %}
+    </body>
+</html>

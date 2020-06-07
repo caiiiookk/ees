@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block style %}
+
+            .overflow::-webkit-scrollbar {
+              width: 4px;
+            }
+
+            .overflow::-webkit-scrollbar-track {
+              box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+            }
+
+            .overflow::-webkit-scrollbar-thumb {
+              background-color: darkgrey;
+              outline: 1px solid slategrey;
+            }
+    .msgs-msgs:hover{
+        background-color:#6c757d;
+    }
+    .msgs-container:hover{
+        background-color: lightgrey;
+    }
+{% endblock %}
+
+{% block content %}
+    <div class="container w-75 mt-3">
+        <div class="row" style="height: 75vh;">
+            {% include 'chat/chats_list.html' %}
+            <div class="col d-flex flex-column h-100" style="background-color: slategrey">
+                <div class="row bg-light">
+                    a
+                </div>
+                <div class="row overflow flex-nowrap h-100 text-break" >
+                    Тут будет отображаться выбранный чат
+                </div>
+                <div class="row mt-auto">
+                    <input type="text" placeholder="Введите сообщение">
+                    <input type="button" value="Отправить">
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'chat.js' %}"></script>
+{% endblock %}

@@ -22,9 +22,9 @@ class NewsDeleteView(View):
     def post(self, request, id):
         try:
             news = NewsModel.objects.get(id=id)
-        except:
+        except NewsModel.DoesNotExist:
             raise Http404
-        if not (has_moderator_permission(request.user) and request.user == getattr(news, 'publisher') or has_admin_permission(request.user)):
+        if not ((has_moderator_permission(request.user) and id == getattr(news, 'publisher') or has_admin_permission(request.user))):
             raise PermissionDenied
         news.delete()
         return redirect('news_app:news')
@@ -58,7 +58,7 @@ class NewsShowView(View):
     def get(self, request, id):
         try:
             news = NewsModel.objects.get(id=id)
-        except:
+        except NewsModel.DoesNotExist:
             raise Http404
         context = {
             'news': news
@@ -70,7 +70,7 @@ class NewsEditView(View):
     def get(self, request, id):
         try:
             news = NewsModel.objects.get(id=id)
-        except:
+        except NewsModel.DoesNotExist:
             raise Http404
         if not (has_moderator_permission(request.user) and request.user == getattr(news, 'publisher')):
             raise PermissionDenied
@@ -84,7 +84,7 @@ class NewsEditView(View):
     def post(self, request, id):
         try:
             news = NewsModel.objects.get(id=id)
-        except:
+        except NewsModel.DoesNotExist:
             raise Http404
         if not (has_moderator_permission(request.user) and request.user == getattr(news, 'publisher')):
             raise PermissionDenied

@@ -1,20 +1,17 @@
 {% extends 'base.html' %}
-
+{% load tz%}
 {% block content %}
 <div class="container pt-20">
     <h5><a class="text-dark" href="{% url 'news_app:show' id=news.id %}">{{ news.name }}</a></h5>
     <p class="border m-3 p-5">{{ news.content }}</p>
     <footer class="text-muted" style="float: left">
-    <a class="text-secondary" href="{% url 'users_app:profile' id=news.publisher.id %}">{{ news.publisher.username }}</a>, {{ news.publish_date }}</footer>
+    <a class="text-secondary" href="{% url 'users_app:profile' id=news.publisher.id %}">{{ news.publisher.username }}</a>, {{ news.publish_date|utc }}</footer>
     {% if user_permissions.admin or user_permissions.moderator and news.publisher == user %}
         <div style="float: right">
             {% if news.publisher == user %}
                 <a class="text-secondary" href="{% url 'news_app:edit' id=news.id %}">Редактировать</a>
             {% endif %}
-            <form method="POST" action="{% url 'news_app:delete' id=news.id %}" class="d-inline">
-                {% csrf_token %}
-                <a class="text-secondary" style="cursor: pointer;" onclick="if(confirm('Вы уверены, что хотите удалить эту новость?'))this.closest('form').submit();return false;">Удалить</a>
-            </form>
+            <a class="text-secondary" onclick="return confirm('Вы уверены, что хотите удалить эту новость?')" href="{% url 'news_app:delete' id=news.id %}">Удалить</a>
         </div>
     {% endif %}
 

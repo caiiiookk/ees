@@ -11,7 +11,7 @@
 
     {% for try in tries %}
         <div class="row">
-            Попытка {{ forloop.counter }}<span class="ml-5">{% if try.rated %}Оценено({{ try.rating }}/{{ try.max_rating }}){% else %}Не оценено{% endif %}</span>
+            <a href="try/{{ forloop.counter }}/">Попытка {{ forloop.counter }}<span class="ml-5">{% if try.rated %}Оценено({{ try.rating }}/{{ try.max_rating }}){% else %}Не оценено{% endif %}</span></a>
         </div>
     {% endfor %}
 </div>

@@ -4,15 +4,32 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User
 from .models import EESUser
 from courses_app.models import CourseModel, Course2Teacher, Course2Employee, Course2Student
-from .forms import AdminPanelEESUserChangeForm
+from .forms import AdminPanelEESUserChangeForm, UserIsActiveForm
 from django import views
 from users_app import permissions
-from .forms import EESUser_Form, UserProfileEditForm, forms
+from .forms import EESUserProfileEditForm, UserProfileEditForm, forms
+from django.utils import timezone
 # Create your views here.
 
 
+def get_student_courses(user):
+    return CourseModel.objects.filter(course2student__in=Course2Student.objects.filter(student=user)).order_by('id')
+
+
+def get_teacher_courses(user):
+    return CourseModel.objects.filter(course2teacher__in=Course2Teacher.objects.filter(teacher=user)).order_by('id')
+
+
+def get_employee_courses(user):
+    return CourseModel.objects.filter(course2employee__in=Course2Employee.objects.filter(employee=user)).order_by('id')
+
+
+
 def users_view(request):
-    users = User.objects.filter(is_active=True).order_by('username')
+    if request.user.is_authenticated and request.user.eesuser.is_admin:
+        users = User.objects.all().order_by('username')
+    else:
+        users = User.objects.filter(is_active=True).order_by('username')
     context = {
         'users': users,
     }
@@ -22,11 +39,11 @@ def users_view(request):
 def profile_view(request, id):
     try:
         opened_user = User.objects.get(id=id)
-    except:
+    except User.DoesNotExist:
         raise Http404
-    student_courses = CourseModel.objects.filter(course2student__in=Course2Student.objects.filter(student=opened_user)).order_by('id')
-    teacher_courses = CourseModel.objects.filter(course2teacher__in=Course2Teacher.objects.filter(teacher=opened_user)).order_by('id')
-    employee_courses = CourseModel.objects.filter(course2employee__in=Course2Employee.objects.filter(employee=opened_user)).order_by('id')
+    student_courses = get_student_courses(opened_user)
+    teacher_courses = get_teacher_courses(opened_user)
+    employee_courses = get_employee_courses(opened_user)
     context = {
         'opened_user': opened_user,
         'student_courses': student_courses,
@@ -40,18 +57,20 @@ class ProfileEditView(views.View):
     def get(self, request, id):
         try:
             opened_user = User.objects.get(id=id)
-        except:
+        except User.DoesNotExist:
             raise Http404
         if opened_user != request.user:
             return redirect('users_app:profile', id=id)
 
-        eesuser_form = EESUser_Form(instance=opened_user.eesuser)
+        eesuser_form = EESUserProfileEditForm(instance=opened_user.eesuser)
         user_form = UserProfileEditForm(instance=opened_user)
         eesuser = opened_user.eesuser
+
         can_change_username = getattr(eesuser, 'can_change_username')
         can_change_email = getattr(eesuser, 'can_change_email')
         can_change_first_name = getattr(eesuser, 'can_change_first_name')
         can_change_last_name = getattr(eesuser, 'can_change_last_name')
+
         user_form.fields['username'].widget.attrs['readonly'] = not can_change_username
         user_form.fields['email'].widget.attrs['readonly'] = not can_change_email
         user_form.fields['last_name'].widget.attrs['readonly'] = not can_change_last_name
@@ -66,22 +85,26 @@ class ProfileEditView(views.View):
     def post(self, request, id):
         try:
             opened_user = User.objects.get(id=id)
-        except:
+        except User.DoesNotExist:
             raise Http404
+
         if opened_user != request.user:
             return redirect('users_app:profile', id=id)
-        print(request.POST)
-        eesuser_form = EESUser_Form(request.POST, request.FILES, instance=opened_user.eesuser)
+
+        eesuser_form = EESUserProfileEditForm(request.POST, request.FILES, instance=opened_user.eesuser)
         user_form = UserProfileEditForm(request.POST, instance=opened_user)
         eesuser = opened_user.eesuser
+
         can_change_username = getattr(eesuser, 'can_change_username')
         can_change_email = getattr(eesuser, 'can_change_email')
         can_change_first_name = getattr(eesuser, 'can_change_first_name')
         can_change_last_name = getattr(eesuser, 'can_change_last_name')
+
         cached_username = opened_user.username
         cached_last_name = opened_user.last_name
         cached_first_name = opened_user.first_name
         cached_email = opened_user.email
+
         if eesuser_form.is_valid() and user_form.is_valid():
             eesuser_form.save()
             updated_user = user_form.save(commit=False)
@@ -103,29 +126,21 @@ class ProfileAdminPanelView(views.View):
     def get(self, request, id):
         try:
             opened_user = User.objects.get(id=id)
-        except:
+        except User.DoesNotExist:
             raise Http404
-        if not(request.user.is_superuser or permissions.has_admin_permission(request.user) and (opened_user == request.user or not opened_user.eesuser.is_admin)):
+
+        if not permissions.has_admin_permission(request.user):
             return redirect('users_app:profile', id=id)
+
         courses = CourseModel.objects.all()
-        user_student_courses    = CourseModel.objects.filter(course2student__in=Course2Student.objects.filter(student=opened_user)).order_by('id')
-        user_teacher_courses    = CourseModel.objects.filter(course2teacher__in=Course2Teacher.objects.filter(teacher=opened_user)).order_by('id')
-        user_employee_courses   = CourseModel.objects.filter(course2employee__in=Course2Employee.objects.filter(employee=opened_user)).order_by('id')
+
+        user_student_courses    = get_student_courses(opened_user)
+        user_teacher_courses    = get_teacher_courses(opened_user)
+        user_employee_courses   = get_employee_courses(opened_user)
+
         eesuser = opened_user.eesuser
         permissions_form = AdminPanelEESUserChangeForm(instance=eesuser)
 
-        class UserIsActiveForm(forms.ModelForm):
-            is_active = forms.BooleanField(
-                widget=forms.CheckboxInput(
-                    attrs={
-                        'class': 'form-check-input',
-                    },
-                ),
-                required=False,
-            )
-            class Meta:
-                model = User
-                fields = ['is_active']
         user_is_active_form = UserIsActiveForm(instance=opened_user)
         context = {
             'permissions_form': permissions_form,
@@ -141,25 +156,13 @@ class ProfileAdminPanelView(views.View):
     def post(self, request, id):
         try:
             opened_user = User.objects.get(id=id)
-        except:
+        except User.DoesNotExist:
             raise Http404
-        if not(request.user.is_superuser or permissions.has_admin_permission(request.user) and (opened_user == request.user or not opened_user.eesuser.is_admin)):
+        if not(request.user.is_superuser or permissions.has_admin_permission(request.user) and not opened_user == request.user):
             return redirect('users_app:profile', id=id)
         eesuser = opened_user.eesuser
         permissions_form = AdminPanelEESUserChangeForm(request.POST, instance=eesuser)
 
-        class UserIsActiveForm(forms.ModelForm):
-            is_active = forms.BooleanField(
-                widget=forms.CheckboxInput(
-                    attrs={
-                        'class': 'form-check-input',
-                    },
-                ),
-                required=False,
-            )
-            class Meta:
-                model = User
-                fields = ['is_active']
         user_is_active_form = UserIsActiveForm(request.POST, instance=opened_user)
         if permissions_form.is_valid() and user_is_active_form.is_valid():
             user_is_active_form.save()
@@ -168,18 +171,11 @@ class ProfileAdminPanelView(views.View):
             teacher_courses = request.POST.getlist('select2')
             employee_courses = request.POST.getlist('select4')
             student_courses = request.POST.getlist('select6')
-            try:
-                Course2Student.objects.filter(student=opened_user).delete()
-            except:
-                pass
-            try:
-                Course2Employee.objects.filter(employee=opened_user).delete()
-            except:
-                pass
-            try:
-                Course2Teacher.objects.filter(teacher=opened_user).delete()
-            except:
-                pass
+            
+            Course2Student.objects.filter(student=opened_user).delete()
+            Course2Employee.objects.filter(employee=opened_user).delete()
+            Course2Teacher.objects.filter(teacher=opened_user).delete()
+            
             for course in student_courses:
                 Course2Student.objects.create(student=opened_user, course=CourseModel.objects.get(id=course))
             for course in teacher_courses:
@@ -219,16 +215,14 @@ def sign_up_view(request):
 
 
 def change_password_view(request):
-    if not request.user.is_authenticated:
-        return redirect('main_app:main')
     if request.method == 'POST':
-        form = PasswordChangeForm(data=request.POST, user=request.user)
+        form = PasswordChangeForm(request.user, request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            return redirect('users_app:my_profile')
+            return redirect('users_app:edit', id=user.id)
     else:
-        form = PasswordChangeForm(user=request.user)
+        form = PasswordChangeForm(request.user)
     return render(request, 'users/change_pw.html', {'form': form})
 
 

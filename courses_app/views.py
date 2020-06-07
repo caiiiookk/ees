@@ -2,6 +2,7 @@ from django import views
 from django.shortcuts import render, redirect, Http404
 from django.urls import resolve
 from users_app.permissions import has_admin_permission
+from django.core.exceptions import PermissionDenied
 from .forms import (
     EditCourseForm,
     EditSectionForm,
@@ -78,11 +79,11 @@ def has_access_to_employee_course(user, course):
 def teacher_page_start(request, course_id):
     try:
         course = CourseModel.objects.get(id=course_id)
-    except:
+    except CourseModel.DoesNotExist:
         raise Http404
     has_access = has_access_to_teacher_course(request.user, course)
     if not has_access:
-        raise Http404
+        raise PermissionDenied
     curr_section = get_section_by_url(course.section, request.get_full_path())
     return course, curr_section
 
@@ -90,11 +91,11 @@ def teacher_page_start(request, course_id):
 def employee_page_start(request, course_id):
     try:
         course = CourseModel.objects.get(id=course_id)
-    except:
+    except CourseModel.DoesNotExist:
         raise Http404
     has_access = has_access_to_employee_course(request.user, course)
     if not has_access:
-        raise Http404
+        raise PermissionDenied
     curr_section = get_section_by_url(course.section, request.get_full_path())
     return course, curr_section
 
@@ -102,11 +103,11 @@ def employee_page_start(request, course_id):
 def student_page_start(request, course_id):
     try:
         course = CourseModel.objects.get(id=course_id)
-    except:
+    except CourseModel.DoesNotExist:
         raise Http404
     has_access = has_access_to_student_course(request.user, course)
     if not has_access:
-        raise Http404
+        raise PermissionDenied
     curr_section = get_section_by_url(course.section, request.get_full_path())
     return course, curr_section
 
@@ -130,7 +131,7 @@ def generate_questions_list(test):
 
     import random
     questions = []
-    for key, value in groups:
+    for key, value in groups.items():
         random.shuffle(value)
         questions.append(value)
 
@@ -157,7 +158,7 @@ def generate_questions_list(test):
 
 
 class DeleteCourseView(views.View):
-    def get(self, request, id):
+    def post(self, request, id):
         try:
             course = CourseModel.objects.get(id=id)
         except:
@@ -288,6 +289,62 @@ class EmployeeTestView(views.View):
         return render(request, 'courses/employee_test.html', context)
 
 
+class ShowResults(views.View):
+    def get(self, request, course_id, id):
+        return render(request, 'courses/results.html')
+
+
+class CourseInfoView(views.View):
+    def get(self, request, id):
+        try:
+            course = CourseModel.objects.get(id=id)
+        except:
+            raise Http404
+        teachers = User.objects.filter(course2teacher__course=course).order_by('username')
+        print(teachers)
+        context = {
+            'teachers': teachers,
+        }
+        return render(request, 'courses/info.html', context)
+
+
+class StudentTestShowTryView(views.View):
+    def get(self, request, course_id, id, try_id):
+        course, curr_section = student_page_start(request, course_id)
+
+        test = TestsModel.objects.filter(section=curr_section).order_by('id')[int(id) - 1]
+        user = request.user
+        try_entry = TriesModel.objects.filter(test=test, student=user).order_by('id')[int(try_id) - 1]
+        answers = Try2Question.objects.filter(try_field=try_entry).order_by('id')
+
+        automaticly_rated = []
+        not_automaticly_rated = []
+        rate_forms = []
+        counter = 0
+        for answer in answers:
+            if answer.question.type == 'r' or answer.question.type == 'c':
+                real_answers = CheckOrRadioAnswerModel.objects.filter(question=answer.question).order_by('id')
+                import json
+                try:
+                    answer.answer = list(json.loads('{"ans": ' + answer.answer.replace("'", '"') + '}')['ans'])
+                except:
+                    answer.answer = None
+                automaticly_rated.append({'answer': answer, 'real_answers': real_answers})
+            else:
+                rate_forms.append(EmployeeRateForm(prefix=counter, instance=answer))
+                counter += 1
+                not_automaticly_rated.append(answer)
+        context = {
+            'test': test,
+            'user': user,
+            'try': try_entry,
+            'try_no': try_id,
+            'automaticly_rated': automaticly_rated,
+            'not_automaticly_rated': not_automaticly_rated,
+            'rate_forms': rate_forms,
+        }
+        return render(request, 'courses/student_test_show_try_view.html', context)
+
 class StudentTestTryView(views.View):
     def get(self, request, course_id, id):
         course, curr_section = student_page_start(request, course_id)
@@ -407,13 +464,18 @@ class StudentTestTryView(views.View):
                 correct_answers_count = CheckOrRadioAnswerModel.objects.filter(question=mod.question,
                                                                                is_correct=True).count()
                 answer = mod.answer
-                import ast
                 correct = 0
                 model_answer = CheckOrRadioAnswerModel.objects.filter(question=mod.question)
                 if type(answer) == str:
                     try:
-                        answer = list(ast.literal_eval(answer))
-                    except TypeError:
+                        print(answer)
+                        import ast
+                        parsed = ast.parse(answer, mode='eval')
+                        fixed = ast.fix_missing_locations(parsed)
+                        compiled = compile(fixed, '<string>', 'eval')
+                        print(compiled)
+                        answer = eval(compiled)
+                    except:
                         answer = [answer]
                 else:
                     try:
@@ -445,7 +507,7 @@ class StudentTestTryView(views.View):
 
 
 class TeacherTestDeleteView(views.View):
-    def get(self, request, course_id, id):
+    def post(self, request, course_id, id):
         course, curr_section = teacher_page_start(request, course_id)
         test = TestsModel.objects.filter(section=curr_section).order_by('id')[int(id) - 1]
         test.delete()
@@ -563,14 +625,16 @@ class StudentTestMainShowView(views.View):
             question_count = min(without_groups_count + groups.__len__(), test.number_of_questions)
         import datetime
         no_test_button = False
-        if tries.count() == test.tries and test.tries != 0 and test.tries is not None \
-                and test.time_restriction != 0 \
+        if test.time_restriction != 0 \
                 and test.time_restriction is not None \
                 and tries.last() is not None \
                 and datetime.datetime.utcnow() < (
                 tries.last().date_started + datetime.timedelta(minutes=test.time_restriction + 0.1)).replace(tzinfo=None) \
                 and tries.last().date_submitted is None:
+            pass
+        elif tries.count() == test.tries and test.tries != 0 and test.tries is not None:
             no_test_button = True
+        print(no_test_button)
         context = {
             'test': test,
             'question_count': question_count,
@@ -781,7 +845,7 @@ class TeacherSectionEditView(views.View):
 
 
 class TeacherSectionDeleteView(views.View):
-    def get(self, request, course_id):
+    def post(self, request, course_id):
         course, curr_section = teacher_page_start(request, course_id)
 
         curr_section.delete()
@@ -876,7 +940,7 @@ class TeacherDocumentEditView(views.View):
 
 
 class TeacherPageDeleteView(views.View):
-    def get(self, request, course_id, id):
+    def post(self, request, course_id, id):
         course, curr_section = teacher_page_start(request, course_id)
         page = PagesModel.objects.filter(section=curr_section).order_by('id')[int(id) - 1]
         page.delete()
@@ -884,7 +948,7 @@ class TeacherPageDeleteView(views.View):
 
 
 class TeacherDocumentDeleteView(views.View):
-    def get(self, request, course_id, id):
+    def post(self, request, course_id, id):
         course, curr_section = teacher_page_start(request, course_id)
 
         document = DocumentsModel.objects.filter(section=curr_section).order_by('id')[int(id) - 1]

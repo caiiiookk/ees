@@ -5,11 +5,11 @@ from django.contrib.auth.models import User
 
 
 class SectionModel(models.Model):
-    name = models.CharField(max_length=40, null=True)
+    name = models.CharField(max_length=250, null=True)
 
 
 class CourseModel(models.Model):
-    name                = models.CharField(max_length=60)
+    name                = models.CharField(max_length=250)
     section             = models.OneToOneField(SectionModel, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -17,7 +17,7 @@ class CourseModel(models.Model):
 
 
 class TestsModel(models.Model):
-    name                = models.CharField(max_length=60)
+    name                = models.CharField(max_length=250)
     description         = models.TextField(blank=True)
     number_of_questions = models.IntegerField(null=True)
     tries               = models.IntegerField(null=True)
@@ -46,13 +46,13 @@ class Question2Group(models.Model):
 
 
 class DocumentsModel(models.Model):
-    name        = models.CharField(max_length=40)
+    name        = models.CharField(max_length=250)
     document    = models.FileField(upload_to='documents/')
     section     = models.ForeignKey(SectionModel, on_delete=models.CASCADE)
 
 
 class PagesModel(models.Model):
-    name    = models.CharField(max_length=40, null=False)
+    name    = models.CharField(max_length=250, null=False)
     content = models.TextField(null=True)
     section = models.ForeignKey(SectionModel, on_delete=models.CASCADE)
 

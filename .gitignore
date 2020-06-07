@@ -14,5 +14,3 @@ psycopg2-2.8.5/
 users.png
 venv/
 EES/settings.py
-static/admin/
-static/django-extensions/

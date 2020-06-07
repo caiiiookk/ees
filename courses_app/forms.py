@@ -14,7 +14,7 @@ from .models import (
 
 class EditCourseForm(forms.ModelForm):
     name = forms.CharField(
-        max_length=30,
+        max_length=250,
         widget=forms.TextInput(
             attrs={
                 'class': 'form-control',
@@ -32,7 +32,7 @@ class EditCourseForm(forms.ModelForm):
 
 class EditSectionForm(forms.ModelForm):
     name = forms.CharField(
-        max_length=30,
+        max_length=250,
         widget=forms.TextInput(
             attrs={
                 'class': 'form-control',
@@ -48,7 +48,7 @@ class EditSectionForm(forms.ModelForm):
 
 class EditPageForm(forms.ModelForm):
     name = forms.CharField(
-        max_length=30,
+        max_length=250,
         widget=forms.TextInput(
             attrs={
                 'class': 'form-control',
@@ -74,7 +74,7 @@ class EditPageForm(forms.ModelForm):
 
 class EditDocumentForm(forms.ModelForm):
     name = forms.CharField(
-        max_length=30,
+        max_length=250,
         widget=forms.TextInput(
             attrs={
                 'class': 'form-control',
@@ -92,7 +92,7 @@ class EditDocumentForm(forms.ModelForm):
 
 class EditTestForm(forms.ModelForm):
     name = forms.CharField(
-        max_length=30,
+        max_length=250,
         widget=forms.TextInput(
             attrs={
                 'class': 'form-control',
@@ -217,7 +217,7 @@ class EditQuestionForm(forms.ModelForm):
 class UserQuestionCheckForm(forms.ModelForm):
     answer = forms.MultipleChoiceField(
         widget=forms.CheckboxSelectMultiple(attrs={
-            'class': 'form-control',
+            # 'class': 'form-control',
         }),
         label='Ответ',
         required=False,
@@ -231,7 +231,7 @@ class UserQuestionCheckForm(forms.ModelForm):
 class UserQuestionRadioForm(forms.ModelForm):
     answer = forms.ChoiceField(
         widget=forms.RadioSelect(attrs={
-            'class': 'form-control',
+            # 'class': 'form-control',
         }),
         label='Ответ',
         required=False,
@@ -245,7 +245,7 @@ class UserQuestionRadioForm(forms.ModelForm):
 class UserQuestionInputForm(forms.ModelForm):
     answer = forms.CharField(
         widget=forms.Textarea(attrs={
-            'class': 'form-control',
+            # 'class': 'form-control',
         }),
         label='Ответ',
         required=False,
@@ -261,7 +261,7 @@ class UserQuestionFileForm(forms.ModelForm):
         label='Ответ',
         required=False,
         widget=forms.FileInput(attrs={
-            'class': 'form-control',
+            # 'class': 'form-control',
         }),
     )
 

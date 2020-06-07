@@ -26,6 +26,9 @@ from .views import (
     EmployeeTestView,
     EmployeeTestRateView,
     DeleteCourseView,
+    StudentTestShowTryView,
+    CourseInfoView,
+    ShowResults,
 )
 
 app_name = 'courses_app'
@@ -33,6 +36,7 @@ app_name = 'courses_app'
 urlpatterns = [
     path('', MainCoursesView.as_view(), name='courses'),
     path('add/', AddCourseView.as_view(), name='add_course'),
+    path('info/<int:id>/', CourseInfoView.as_view(), name='course_info'),
     path('edit/<int:id>/', EditCourseView.as_view(), name='edit_course'),
     path('delete/<int:id>/', DeleteCourseView.as_view(), name='delete_course'),
     #re_path(r't-course/(?P<course_id>\d+)/(section/[0-9]+/)*document/(?P<id>\d+)/', TeacherCourseDocumentView.as_view(), name='t-document'),
@@ -41,12 +45,13 @@ urlpatterns = [
     re_path(r'^t-course/(?P<course_id>\d+)/(section/[0-9]+/)*add_page/$', TeacherPageAddView.as_view(), name='t-page-add'),
     re_path(r'^t-course/(?P<course_id>\d+)/(section/[0-9]+/)*add_document/$', TeacherDocumentAddView.as_view(), name='t-document-add'),
     re_path(r'^t-course/(?P<course_id>\d+)/(section/[0-9]+/)*add_test/$', TeacherTestAddView.as_view(), name='t-test-add'),
-    re_path(r'^t-course/(?P<course_id>\d+)/(section/[0-9]+/)*edit$', TeacherSectionEditView.as_view(), name='t-section-edit'),
+    re_path(r'^t-course/(?P<course_id>\d+)/(section/[0-9]+/)*edit/$', TeacherSectionEditView.as_view(), name='t-section-edit'),
     re_path(r'^t-course/(?P<course_id>\d+)/(section/[0-9]+/)*page/(?P<id>\d+)/edit/$', TeacherPageEditView.as_view(), name='t-page-edit'),
     re_path(r'^t-course/(?P<course_id>\d+)/(section/[0-9]+/)*document/(?P<id>\d+)/edit/$', TeacherDocumentEditView.as_view(), name='t-document-edit'),
     re_path(r'^t-course/(?P<course_id>\d+)/(section/[0-9]+/)*test/(?P<id>\d+)/edit/$', TeacherTestEditView.as_view(), name='t-test-edit'),
     re_path(r'^t-course/(?P<course_id>\d+)/(section/[0-9]+/)*test/(?P<id>\d+)/$', TeacherTestShowView.as_view(), name='t-test-show'),
-    re_path(r'^t-course/(?P<course_id>\d+)/(section/[0-9]+/)*delete$', TeacherSectionDeleteView.as_view(), name='t-section-edit'),
+    re_path(r'^t-course/(?P<course_id>\d+)/(section/[0-9]+/)*test/(?P<id>\d+)/results/$', ShowResults.as_view(), name='t-test-show'),
+    re_path(r'^t-course/(?P<course_id>\d+)/(section/[0-9]+/)*delete/$', TeacherSectionDeleteView.as_view(), name='t-section-edit'),
     re_path(r'^t-course/(?P<course_id>\d+)/(section/[0-9]+/)*page/(?P<id>\d+)/delete/$', TeacherPageDeleteView.as_view(), name='t-page-delete'),
     re_path(r'^t-course/(?P<course_id>\d+)/(section/[0-9]+/)*document/(?P<id>\d+)/delete/$', TeacherDocumentDeleteView.as_view(), name='t-document-delete'),
     re_path(r'^t-course/(?P<course_id>\d+)/(section/[0-9]+/)*test/(?P<id>\d+)/delete/$', TeacherTestDeleteView.as_view(), name='t-test-delete'),
@@ -56,6 +61,7 @@ urlpatterns = [
     re_path(r'^s-course/(?P<course_id>\d+)/(section/[0-9]+/)*page/(?P<id>\d+)/$', PageShowView.as_view(), name='s-page-show'),
     re_path(r'^s-course/(?P<course_id>\d+)/(section/[0-9]+/)*test/(?P<id>\d+)/$', StudentTestMainShowView.as_view(), name='s-test-show'),
     re_path(r'^s-course/(?P<course_id>\d+)/(section/[0-9]+/)*test/(?P<id>\d+)/try/$', StudentTestTryView.as_view(), name='s-test-try'),
+    re_path(r'^s-course/(?P<course_id>\d+)/(section/[0-9]+/)*test/(?P<id>\d+)/try/(?P<try_id>\d+)/$', StudentTestShowTryView.as_view(), name='s-test-try'),#
     re_path(r'^s-course/(?P<course_id>\d+)/(section/[0-9]+/)*document/(?P<id>\d+)/$', DocumentShowView.as_view(), name='s-document-show'),
     re_path(r'^e-course/(?P<course_id>\d+)/(section/[0-9]+/)*$', EmployeeSectionView.as_view(), name='e-section'),
     re_path(r'^e-course/(?P<course_id>\d+)/(section/[0-9]+/)*test/(?P<id>\d+)/$', EmployeeTestView.as_view(), name='e-test-show'),

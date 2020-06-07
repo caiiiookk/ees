@@ -1,4 +1,5 @@
 from django.shortcuts import reverse, render, redirect, Http404
+from django.core.exceptions import PermissionDenied
 from django import views
 from .models import (
     MessageModel,
@@ -57,56 +58,28 @@ def form_chats_list(user):
 class ChatMainView(views.View):
     def get(self, request):
         if not request.user.is_authenticated:
-            raise Http404
-        chats = ChatModel.objects.filter(chat2user__in=Chat2User.objects.filter(user=request.user))
-        chatlist = []
-        for chat in chats:
-            chat_type = getattr(chat, 'type')
-            chat_name = getattr(chat, 'name')
-            chat_last_message = MessageModel.objects.filter(chat=chat).order_by('-datetime').first()
-            if chat_type == 'u':
-                chat_info = Chat2User.objects.filter(chat=chat).get(~Q(user=request.user))
-                chat_user = getattr(chat_info, 'user')
-                chat_name = getattr(chat_user, 'username')
-                chat_avatar = getattr(chat_user.eesuser, 'avatar')
-            elif chat_type == 'c':
-                chat_avatar = '/media/no_img.png'
-            else:
-                chat_avatar = '/media/no_img.png'
-
-            unread_messages = User2UnreadMessage.objects.filter(user=request.user).count()
-            chatlist.append({
-                'name': chat_name,
-                'last_message': chat_last_message,
-                'unread_messages': unread_messages,
-                'avatar': chat_avatar,
-                'id': getattr(chat, 'id'),
-            })
+            raise PermissionDenied
         context = {
-            'chats': chatlist,
             'chats_list': form_chats_list(request.user),
         }
         return render(request, 'chat/index.html', context)
 
 
+def get_user_from_chat_id_or_404(chat_id):
+    try:
+        return User.objects.get(id=chat_id)
+    except:
+        raise Http404
+
+
 class OpenChatView(views.View):
     def get(self, request, chat_type, chat_id):
         if chat_type == 'u':
-            try:
-                requested_user = User.objects.get(id=chat_id)
-            except:
-                raise Http404
-
-            this_chat = ChatModel.objects.filter(chat2user__user=request.user).intersection(ChatModel.objects.filter(chat2user__user=requested_user))
-            if this_chat.__len__() == 0:
-                this_chat = ChatModel.objects.create(type='u', created_at=datetime.utcnow())
-                Chat2User.objects.create(chat=this_chat, user=request.user, activated=True, created=datetime.utcnow())
-                Chat2User.objects.create(chat=this_chat, user=requested_user, activated=False, created=datetime.utcnow())
-            else:
-                this_chat = this_chat[0]
-            chat_messages = MessageModel.objects.filter(chat=this_chat).order_by('-datetime')
+            other_user = get_user_from_chat_id_or_404(chat_id)
+            this_chat = ChatModel.objects.get_or_create_user_chat(request.user, other_user)
+            chat_messages = MessageModel.objects.filter(chat=this_chat).order_by('datetime')
             context = {
-                'other_user': requested_user,
+                'other_user': other_user,
                 'chats_list': form_chats_list(request.user),
                 'chat_messages': chat_messages,
                 'this_chat': this_chat,
@@ -120,19 +93,10 @@ class OpenChatView(views.View):
 
     def post(self, request, chat_type, chat_id):
         if chat_type == 'u':
-            try:
-                requested_user = User.objects.get(id=chat_id)
-            except:
-                raise Http404
-
-            this_chat = ChatModel.objects.filter(chat2user__user=request.user).intersection(ChatModel.objects.filter(chat2user__user=requested_user))
-            if this_chat.__len__() == 0:
-                raise Http404
-            else:
-                this_chat = this_chat[0]
+            other_user = get_user_from_chat_id_or_404(chat_id)
+            this_chat = ChatModel.objects.get_or_create_user_chat(request.user, chat_id)
             if request.POST['message']:
-                MessageModel.objects.create(chat=this_chat, content=request.POST['message'], sender=request.user, datetime=datetime.utcnow())
-                #Create unread msg for all other usrs
+                MessageModel.objects.create_new_message(chat=this_chat, content=request.POST['message'], sender=request.user)
 
             return redirect('chat_app:chat_url', chat_type=chat_type, chat_id=chat_id)
         elif chat_type == 'c':

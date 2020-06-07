@@ -13,12 +13,16 @@
                         {% for course in student_courses %}
                         <li class="list-group-item">
                             <a class="text-secondary" href="{% url 'courses_app:s-section' course_id=course.id %}">{{ course.name }}</a>
-                            {% if user.is_superuser %}
-                                <div style="float: right;">
-                                    <a class="text-secondary" href="{% url 'courses_app:edit_course' id=course.id %}">Изменить</a>
-                                    <a class="text-secondary" onclick="return confirm('Вы уверены, что хотите удалить этот курс?')" href="{% url 'courses_app:delete_course' id=course.id %}">Удалить</a>
-                                </div>
-                            {% endif %}
+                            <div style="float: right;">
+                                <a class="text-secondary" href="{% url 'courses_app:course_info' id=course.id %}">Информация</a>
+                                {% if user.is_superuser %}
+                                        <a class="text-secondary" href="{% url 'courses_app:edit_course' id=course.id %}">Изменить</a>
+                                        <form method="POST" action="{% url 'courses_app:delete_course' id=course.id %}" class="d-inline m-0">
+                                        {% csrf_token %}
+                                            <a class="text-secondary" style="cursor:pointer;" onclick="if(confirm('Вы уверены, что хотите удалить этот курс?')) this.closest('form').submit();">Удалить</a>
+                                        </form>
+                                {% endif %}
+                            </div>
                         </li>
                         {% endfor %}
                     </ul>
@@ -33,15 +37,19 @@
                 <div class="col-md-8">
                     <ul class="list-group list-group-flush">
                         {% for course in teacher_courses %}
-                            <li class="list-group-item">
-                                <a class="text-secondary" href="{% url 'courses_app:t-section' course_id=course.id %}">{{ course.name }}</a>
+                        <li class="list-group-item">
+                            <a class="text-secondary" href="{% url 'courses_app:t-section' course_id=course.id %}">{{ course.name }}</a>
+                            <div style="float: right;">
+                                <a class="text-secondary" href="{% url 'courses_app:course_info' id=course.id %}">Информация</a>
                                 {% if user.is_superuser %}
-                                    <div style="float: right;">
                                         <a class="text-secondary" href="{% url 'courses_app:edit_course' id=course.id %}">Изменить</a>
-                                        <a class="text-secondary" onclick="return confirm('Вы уверены, что хотите удалить этот курс?')" href="{% url 'courses_app:delete_course' id=course.id %}">Удалить</a>
-                                    </div>
+                                        <form method="POST" action="{% url 'courses_app:delete_course' id=course.id %}" class="d-inline m-0">
+                                        {% csrf_token %}
+                                            <a class="text-secondary" style="cursor:pointer;" onclick="if(confirm('Вы уверены, что хотите удалить этот курс?')) this.closest('form').submit();">Удалить</a>
+                                        </form>
                                 {% endif %}
-                            </li>
+                            </div>
+                        </li>
                         {% endfor %}
                     </ul>
                 </div>
@@ -57,12 +65,16 @@
                         {% for course in employee_courses %}
                         <li class="list-group-item">
                             <a class="text-secondary" href="{% url 'courses_app:e-section' course_id=course.id %}">{{ course.name }}</a>
-                            {% if user.is_superuser %}
-                                <div style="float: right;">
-                                    <a class="text-secondary" href="{% url 'courses_app:edit_course' id=course.id %}">Изменить</a>
-                                    <a class="text-secondary" onclick="return confirm('Вы уверены, что хотите удалить этот курс?')" href="{% url 'courses_app:delete_course' id=course.id %}">Удалить</a>
-                                </div>
-                            {% endif %}
+                            <div style="float: right;">
+                                <a class="text-secondary" href="{% url 'courses_app:course_info' id=course.id %}">Информация</a>
+                                {% if user.is_superuser %}
+                                        <a class="text-secondary" href="{% url 'courses_app:edit_course' id=course.id %}">Изменить</a>
+                                        <form method="POST" action="{% url 'courses_app:delete_course' id=course.id %}" class="d-inline m-0">
+                                        {% csrf_token %}
+                                            <a class="text-secondary" style="cursor:pointer;" onclick="if(confirm('Вы уверены, что хотите удалить этот курс?')) this.closest('form').submit();">Удалить</a>
+                                        </form>
+                                {% endif %}
+                            </div>
                         </li>
                         {% endfor %}
                     </ul>

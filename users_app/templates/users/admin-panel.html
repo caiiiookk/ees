@@ -14,7 +14,7 @@
                     <a class="text-secondary nav-link" href="{% url 'users_app:edit' id=opened_user.id %}">Редактирование</a>
                 </li>
                 {% endif %}
-                {% if user.is_superuser or user_permissions.admin and opened_user == user or user_permissions.admin and not opened_user.eesuser.is_admin %}
+                {% if user.is_superuser or user_permissions.admin and not opened_user == user %}
                 <li class="nav-item">
                     <a class="text-secondary nav-link active" href="{% url 'users_app:admin-panel' id=opened_user.id %}">Управление</a>
                 </li>
@@ -196,7 +196,7 @@
                                 </label>
                             </div>
                         </div>
-                        <p class="text-muted pt-4">Обратите внимание, что если преподаватель прикреплен к преподавательскому курсу, он так же прикрепляется и к курсу работника и студента, хоть здесь это и не отображается.</p>
+                        <p class="text-muted pt-4">Обратите внимание, что если преподаватель прикреплен к преподавательскому курсу, он так же прикрепляется и к курсу работника, хоть это и не отображается.</p>
                     </div>
                 </div>
                 <div class="row">

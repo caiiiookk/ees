@@ -3,10 +3,10 @@
 {% block content %}
     <form method="POST" enctype="multipart/form-data" class="container p-20 text-break">
         {% csrf_token %}
-        <h5 class="container">Тест: {{ test.name }} <p><span class="timer">{% if time_left %}Время: {{ time_left }}{% else %}Без ограничения по времени{% endif %}</span><span>(Попытка {{ try_no }})</span></p></h5>
+        <h5 class="container">Тест: {{ test.name }} <p><span class="timer">{% if time_left %}Время: {{ time_left }} сек.{% else %}Без ограничения по времени{% endif %}</span><span>(Попытка {{ try_no }})</span></p></h5>
         {% if test.description %}<p>Описание :{{ test.description }}</p>{% endif %}
         {% for f_n_q in forms_and_questions %}
-            <div class="container border p-2">
+            <div class="container border p-2 d-inline-block">
                 <p>Вопрос: {{ f_n_q.question.question }}</p>
                 <div class="container p-2">
                     {{ f_n_q.form }}
@@ -23,8 +23,7 @@
             timer.innerHTML = 'Время: ' + time;
             time--;
             if(time == 0){
-                btn = document.getElementsByClassName('btn')[0];
-                btn.click()
+                time = 40;
             }
         }, 1000)
         {% endif %}

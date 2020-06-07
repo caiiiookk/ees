@@ -2,8 +2,8 @@ from django.shortcuts import render, Http404, redirect
 from django.views.generic import View
 from .models import InfoPageModel
 from .forms import EditPageForm
-from django.core.exceptions import PermissionDenied
 from users_app import permissions
+from django.core.exceptions import PermissionDenied
 
 # Create your views here.
 

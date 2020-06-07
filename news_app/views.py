@@ -4,6 +4,7 @@ from .models import NewsModel
 from .forms import EditNewsForm
 from users_app.models import EESUser, User
 from users_app.permissions import has_moderator_permission, has_admin_permission
+from django.core.exceptions import PermissionDenied
 
 # Create your views here.
 
@@ -18,13 +19,13 @@ class NewsView(View):
 
 
 class NewsDeleteView(View):
-    def get(self, request, id):
+    def post(self, request, id):
         try:
             news = NewsModel.objects.get(id=id)
         except:
             raise Http404
-        if not (has_moderator_permission(request.user) and id == getattr(news, 'publisher') or has_admin_permission(request.user)):
-            raise Http404
+        if not (has_moderator_permission(request.user) and request.user == getattr(news, 'publisher') or has_admin_permission(request.user)):
+            raise PermissionDenied
         news.delete()
         return redirect('news_app:news')
 
@@ -32,7 +33,7 @@ class NewsDeleteView(View):
 class NewsAddView(View):
     def get(self, request):
         if not has_moderator_permission(request.user):
-            raise Http404
+            raise PermissionDenied
         form = EditNewsForm()
         context = {
             'form': form
@@ -41,7 +42,7 @@ class NewsAddView(View):
 
     def post(self, request):
         if not has_moderator_permission(request.user):
-            raise Http404
+            raise PermissionDenied
 
         form = EditNewsForm(request.POST)
         if form.is_valid():
@@ -71,8 +72,8 @@ class NewsEditView(View):
             news = NewsModel.objects.get(id=id)
         except:
             raise Http404
-        if not has_moderator_permission(request.user) and id == getattr(news, 'publisher'):
-            raise Http404
+        if not (has_moderator_permission(request.user) and request.user == getattr(news, 'publisher')):
+            raise PermissionDenied
         form = EditNewsForm(instance=news)
         context = {
             'form': form,
@@ -85,8 +86,8 @@ class NewsEditView(View):
             news = NewsModel.objects.get(id=id)
         except:
             raise Http404
-        if not has_moderator_permission(request.user) and id == getattr(news, 'publisher'):
-            raise Http404
+        if not (has_moderator_permission(request.user) and request.user == getattr(news, 'publisher')):
+            raise PermissionDenied
         form = EditNewsForm(request.POST, instance=news)
         if form.is_valid():
             news = form.save()

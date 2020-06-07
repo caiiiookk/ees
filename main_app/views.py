@@ -2,6 +2,7 @@ from django.shortcuts import render, Http404, redirect
 from django.views.generic import View
 from .models import InfoPageModel
 from .forms import EditPageForm
+from django.core.exceptions import PermissionDenied
 from users_app import permissions
 
 # Create your views here.
@@ -46,7 +47,7 @@ class EditPageView(View):
             raise Http404
         has_admin_permission = permissions.has_admin_permission(request.user)
         if not has_admin_permission:
-            raise Http404
+            raise PermissionDenied
         page = InfoPageModel.objects.get_or_create_page(name=name)
         form = EditPageForm(instance=page)
         context = {
@@ -59,7 +60,7 @@ class EditPageView(View):
         if name not in allowed_pages:
             raise Http404
         if not permissions.has_admin_permission(request.user):
-            raise Http404
+            raise PermissionDenied
         page = InfoPageModel.objects.get(name=name)
         form = EditPageForm(request.POST, instance=page)
         if form.is_valid():

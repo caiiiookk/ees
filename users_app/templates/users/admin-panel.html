@@ -97,7 +97,7 @@
                             <div class="row border py-2">
                                 <div class="col-md">
                                     <div class="container">
-                                        Доступные ученические курсы:
+                                        Доступные курсы слушателя:
                                         <div class="pt-2">
                                             <select id="select5" class="custom-select" multiple>
                                                 {% for course in courses %}
@@ -115,7 +115,7 @@
                                 </div>
                                 <div class="col-md">
                                     <div class="container">
-                                        Выбранные ученические курсы:
+                                        Выбранные курсы слушателя:
                                         <div class="pt-2">
                                             <select id="select6" name="select6" class="custom-select" multiple>
                                                 {% for course in user_student_courses %}
@@ -186,7 +186,7 @@
                             <div class="form-check">
                                 {{ permissions_form.is_student }}
                                 <label class="form-check-label" for="{{ permissions_form.is_student.id_for_label }}">
-                                    Ученик
+                                    Слушатель
                                 </label>
                             </div>
                             <div class="form-check">
@@ -196,7 +196,7 @@
                                 </label>
                             </div>
                         </div>
-                        <p class="text-muted pt-4">Обратите внимание, что если преподаватель прикреплен к преподавательскому курсу, он так же прикрепляется и к курсу работника и студента, хоть здесь это и не отображается.</p>
+                        <p class="text-muted pt-4">Обратите внимание, что если преподаватель прикреплен к преподавательскому курсу, он так же прикрепляется и к курсу работника, хоть здесь это и не отображается.</p>
                     </div>
                 </div>
                 <div class="row">

@@ -61,7 +61,7 @@
                             Модератор&nbsp;
                         {% endif %}
                         {% if opened_user.eesuser.is_student %}
-                            Студент&nbsp;
+                            Слушатель&nbsp;
                         {% endif %}
                     </div>
                 </div>
@@ -76,7 +76,7 @@
                 {% if opened_user.eesuser.is_student %}
                 <div class="row border p-2">
                     <div class="col-md-2 border-right">
-                        Ученик
+                        Слушатель
                     </div>
                     <div class="col pl-5">
                         {% for course in student_courses %}
